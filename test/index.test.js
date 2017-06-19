@@ -1,5 +1,7 @@
 import flucon from '../src';
 
+const increaseCounter = () => dispatch => dispatch({ type: 'INCREMENT' });
+
 describe('flucon', () => {
   it('should work', () => {
     const ACTIONS = {
@@ -21,12 +23,12 @@ describe('flucon', () => {
       return next(action);
     });
 
-    store.dispatch(dispatch => dispatch({ type: 'INCREMENT' }));
+    store.dispatch(increaseCounter());
 
     unsubscribe();
 
-    store.dispatch({ type: 'INCREMENT' });
-    store.dispatch({ type: 'INCREMENT' });
+    store.dispatch(increaseCounter());
+    store.dispatch(increaseCounter());
 
     console.log(store.getState());
   });
