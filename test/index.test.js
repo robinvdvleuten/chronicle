@@ -14,12 +14,14 @@ describe('flucon', () => {
           : state
     );
 
+    store(store.thunk());
+
     const unsubscribe = store((action, next) => {
       console.log(action);
       return next(action);
     });
 
-    store.dispatch({ type: 'INCREMENT' });
+    store.dispatch(dispatch => dispatch({ type: 'INCREMENT' }));
 
     unsubscribe();
 

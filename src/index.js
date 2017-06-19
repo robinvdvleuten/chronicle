@@ -5,6 +5,11 @@ export default (reducer, state = reducer(reducer._, {}), subscribers = []) => {
 
   store.getState = () => state;
 
+  store.thunk = args => (action, next) =>
+    typeof action === 'function'
+      ? action(store.dispatch, store.getState, args)
+      : next(action);
+
   store.dispatch = action => {
     const dispatch = (action, done) =>
       subscribers.length > 0
