@@ -10,8 +10,8 @@ export default (reducer, state = reducer(reducer._, {}), subscribers = []) => {
       ? action(store.dispatch, store.getState, args)
       : next(action);
 
-  store.dispatch = action => {
-    const dispatch = (action, done) =>
+  store.dispatch = action =>
+    ((action, done) =>
       subscribers.length > 0
         ? subscribers
             .slice(1)
@@ -19,10 +19,7 @@ export default (reducer, state = reducer(reducer._, {}), subscribers = []) => {
               (next, subscriber) => action => subscriber(action, next),
               action => subscribers[0](action, done)
             )(action)
-        : done(action);
-
-    dispatch(action, action => (state = reducer(state, action)));
-  };
+        : done(action))(action, action => (state = reducer(state, action)));
 
   return store;
 };
