@@ -17,6 +17,8 @@ $ npm i flucon --save
 ## Usage
 
 ```js
+import flucon, { thunk } from 'flucon';
+
 const ACTIONS = {
   INCREMENT: state => ({ counter: state.counter + 1 }),
   DECREMENT: state => ({ counter: state.counter - 1 }),
@@ -29,7 +31,7 @@ const store = flucon(
       : state
 );
 
-store(store.thunk());
+store(thunk());
 
 const unsubscribe = store((action, next) => {
   console.log(action);
@@ -51,10 +53,10 @@ console.log(store.getState());
 You can run the performance test through `yarn test:perf`;
 
 ```bash
-flucon x 634,920 ops/sec ±3.36% (61 runs sampled)
-flucon with thunk x 277,866 ops/sec ±2.99% (43 runs sampled)
-redux x 564,638 ops/sec ±2.03% (89 runs sampled)
-redux with thunk x 205,052 ops/sec ±3.15% (83 runs sampled)
+flucon x 760,828 ops/sec ±11.53% (56 runs sampled)
+flucon with thunk x 344,415 ops/sec ±4.11% (43 runs sampled)
+redux x 562,143 ops/sec ±1.22% (89 runs sampled)
+redux with thunk x 247,797 ops/sec ±14.79% (77 runs sampled)
 Fastest is flucon
 ```
 

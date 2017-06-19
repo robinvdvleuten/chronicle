@@ -9,6 +9,7 @@ module.exports = {
   dest: pkg.main,
   useStrict: false,
   format: 'umd',
+  exports: 'named',
   plugins: [
     babel({
       presets: [['env', { modules: false }]],

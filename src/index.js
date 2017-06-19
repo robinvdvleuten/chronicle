@@ -1,14 +1,15 @@
+export const thunk = args => store => (action, next) =>
+  typeof action === 'function' ? action(store, args) : next(action);
+
 export default (reducer, state = reducer(reducer._, {}), subscribers = []) => {
-  const store = subscriber =>
-    (subscribers.unshift(subscriber), i =>
-      subscribers.splice((i = subscribers.indexOf(subscriber)), !!~i));
+  const store = s =>
+    (subscriber =>
+      (subscribers.unshift(subscriber), i =>
+        subscribers.splice((i = subscribers.indexOf(subscriber)), !!~i)))(
+      s(store)
+    );
 
   store.getState = () => state;
-
-  store.thunk = args => (action, next) =>
-    typeof action === 'function'
-      ? action(store.dispatch, store.getState, args)
-      : next(action);
 
   store.dispatch = action =>
     ((action, done) =>

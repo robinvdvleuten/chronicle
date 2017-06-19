@@ -1,6 +1,6 @@
-import flucon from '../src';
+import flucon, { thunk } from '../src';
 
-const increaseCounter = () => dispatch => dispatch({ type: 'INCREMENT' });
+const increaseCounter = () => ({ dispatch }) => dispatch({ type: 'INCREMENT' });
 
 describe('flucon', () => {
   it('should work', () => {
@@ -16,9 +16,9 @@ describe('flucon', () => {
           : state
     );
 
-    store(store.thunk());
+    store(thunk());
 
-    const unsubscribe = store((action, next) => {
+    const unsubscribe = store(() => (action, next) => {
       console.log(action);
       return next(action);
     });
