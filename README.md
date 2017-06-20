@@ -2,6 +2,8 @@
 
 Tiny observable & high-performance state management.
 
+[![Build Status](https://travis-ci.org/robinvdvleuten/flucon.svg?branch=master)](https://travis-ci.org/robinvdvleuten/flucon)
+
 ## Installation
 
 ```
