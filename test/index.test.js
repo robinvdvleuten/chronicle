@@ -1,4 +1,5 @@
 import reduxThunk from 'redux-thunk';
+import reduxSaga from 'redux-saga';
 import flucon from '../src';
 import todos, { addTodo, addTodoAsync } from './helpers/todos';
 
@@ -115,11 +116,26 @@ describe('flucon', () => {
     expect(listenerB.mock.calls.length).toBe(2);
   });
 
-  it('supports redux thunk middleware', () => {
+  it('supports redux-thunk middleware', () => {
     const store = flucon(todos);
     store(reduxThunk);
 
     store.dispatch(addTodoAsync('Hello'));
+    expect(store.getState()).toEqual([
+      {
+        id: 1,
+        text: 'Hello',
+      },
+    ]);
+  });
+
+  it('supports redux-saga middleware', () => {
+    const saga = reduxSaga();
+
+    const store = flucon(todos);
+    store(saga);
+
+    store.dispatch(addTodo('Hello'));
     expect(store.getState()).toEqual([
       {
         id: 1,
