@@ -35,7 +35,7 @@ const store = flucon(
 
 store(thunk());
 
-const unsubscribe = store((action, next) => {
+const unsubscribe = store(() => (action, next) => {
   console.log(action);
   return next(action);
 });

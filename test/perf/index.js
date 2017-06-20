@@ -13,7 +13,7 @@ const increaseCounter = suite
     const store = flucon.default(state => state);
     store(flucon.thunk());
 
-    store.dispatch(() => ({ dispatch }) => dispatch({ type: 'INCREMENT' }));
+    store.dispatch(() => dispatch => dispatch({ type: 'INCREMENT' }));
   })
   .add('redux', () => {
     redux.createStore(state => state).dispatch({ type: 'INCREMENT' });

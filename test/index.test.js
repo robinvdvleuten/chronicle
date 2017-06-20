@@ -1,4 +1,4 @@
-import flucon, { thunk } from '../src';
+import flucon from '../src';
 import todos, { addTodo } from './helpers/todos';
 
 const unknownAction = () => ({ type: 'UNKNOWN' });

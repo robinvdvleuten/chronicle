@@ -1,5 +1,7 @@
 export const thunk = args => store => (action, next) =>
-  typeof action === 'function' ? action(store, args) : next(action);
+  typeof action === 'function'
+    ? action(store.dispatch, store.getState, args)
+    : next(action);
 
 export default (reducer, state = reducer(reducer._, {}), subscribers = []) => {
   const store = s =>
