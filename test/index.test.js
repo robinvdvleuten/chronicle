@@ -1,5 +1,6 @@
+import reduxThunk from 'redux-thunk';
 import flucon from '../src';
-import todos, { addTodo } from './helpers/todos';
+import todos, { addTodo, addTodoAsync } from './helpers/todos';
 
 const unknownAction = () => ({ type: 'UNKNOWN' });
 
@@ -69,8 +70,8 @@ describe('flucon', () => {
 
   it('supports multiple subscriptions', () => {
     const store = flucon(todos);
-    const listenerA = jest.fn((action, next) => next(action));
-    const listenerB = jest.fn((action, next) => next(action));
+    const listenerA = jest.fn(next => action => next(action));
+    const listenerB = jest.fn(next => action => next(action));
 
     let unsubscribeA = store(() => listenerA);
     store.dispatch(unknownAction());
@@ -112,5 +113,18 @@ describe('flucon', () => {
     store.dispatch(unknownAction());
     expect(listenerA.mock.calls.length).toBe(4);
     expect(listenerB.mock.calls.length).toBe(2);
+  });
+
+  it('supports redux thunk middleware', () => {
+    const store = flucon(todos);
+    store(reduxThunk);
+
+    store.dispatch(addTodoAsync('Hello'));
+    expect(store.getState()).toEqual([
+      {
+        id: 1,
+        text: 'Hello',
+      },
+    ]);
   });
 });
