@@ -1,0 +1,59 @@
+{
+  "name": "chronicle",
+  "version": "1.0.0",
+  "description": "Tiny observable & high-performance state management",
+  "license": "MIT",
+  "author": "Robin van der Vleuten <robin@webstronauts.co>",
+  "main": "dist/chronicle.js",
+  "jsnext:main": "src/chronicle.js",
+  "keywords": [
+    "flux",
+    "reducer",
+    "rx",
+    "state"
+  ],
+  "files": [
+    "src",
+    "dist/*.js"
+  ],
+  "scripts": {
+    "build": "npm-run-all --silent transpile minify",
+    "transpile": "rollup -c",
+    "minify": "uglifyjs dist/chronicle.js -c collapse_vars,evaluate,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/chronicle.min.js -p relative",
+    "test": "jest --env=jsdom",
+    "test:perf": "node ./test/perf",
+    "format": "prettier --single-quote --trailing-comma es5 --write '{src,test,build}/**/*.js'",
+    "precommit": "lint-staged --verbose",
+    "prepublish": "yarn build"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --single-quote --trailing-comma es5 --write",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robinvdvleuten/chronicle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/robinvdvleuten/chronicle/issues"
+  },
+  "homepage": "https://github.com/robinvdvleuten/chronicle#readme",
+  "devDependencies": {
+    "babel-jest": "^20.0.1",
+    "babel-preset-env": "^1.4.0",
+    "benchmark": "^2.1.4",
+    "husky": "^0.13.3",
+    "jest": "^20.0.1",
+    "lint-staged": "^3.4.1",
+    "npm-run-all": "^4.0.2",
+    "prettier": "^1.3.1",
+    "redux": "^3.7.0",
+    "redux-saga": "^0.15.3",
+    "redux-thunk": "^2.2.0",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.7.1",
+    "uglify-js": "^3.0.3"
+  }
+}
