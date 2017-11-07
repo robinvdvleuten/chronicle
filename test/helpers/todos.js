@@ -9,12 +9,6 @@ export function addTodo(text) {
   return { type: 'ADD_TODO', text };
 }
 
-export function addTodoAsync(text) {
-  return dispatch => {
-    dispatch({ type: 'ADD_TODO', text });
-  };
-}
-
 export default function todos(state = [], action) {
   return action && ACTIONS[action.type]
     ? ACTIONS[action.type](state, action)
