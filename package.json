@@ -5,7 +5,8 @@
   "license": "MIT",
   "author": "Robin van der Vleuten <robin@webstronauts.co>",
   "main": "dist/chronicle.js",
-  "jsnext:main": "src/chronicle.js",
+  "browser": "dist/chronicle.umd.js",
+  "jsnext:main": "src/index.js",
   "keywords": [
     "flux",
     "reducer",
@@ -14,12 +15,12 @@
   ],
   "files": [
     "src",
-    "dist/*.js"
+    "dist"
   ],
   "scripts": {
-    "build": "npm-run-all --silent transpile minify",
-    "transpile": "rollup -c",
-    "minify": "uglifyjs dist/chronicle.js -c collapse_vars,evaluate,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/chronicle.min.js -p relative",
+    "build": "mkdir -p dist && npm run -s build:cjs && npm run -s build:umd",
+    "build:cjs": "rollup -c -i $npm_package_jsnext_main -f cjs --no-strict | uglifyjs -cm -o $npm_package_main",
+    "build:umd": "rollup -c -i $npm_package_jsnext_main -f umd -n $npm_package_name --no-strict | uglifyjs -cm -o $npm_package_browser",
     "test": "jest --env=jsdom",
     "test:perf": "node ./test/perf",
     "format": "prettier --single-quote --trailing-comma es5 --write '{src,test,build}/**/*.js'",
@@ -32,10 +33,7 @@
       "git add"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/robinvdvleuten/chronicle.git"
-  },
+  "repository": "robinvdvleuten/chronicle",
   "bugs": {
     "url": "https://github.com/robinvdvleuten/chronicle/issues"
   },
@@ -53,7 +51,7 @@
     "redux-saga": "^0.15.3",
     "redux-thunk": "^2.2.0",
     "rollup": "^0.41.6",
-    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-buble": "^0.17.0",
     "uglify-js": "^3.0.3"
   }
 }
