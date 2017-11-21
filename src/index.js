@@ -11,9 +11,9 @@ exports.combineEpics = function() {
     const args = [].slice.call(arguments);
 
     return merge.apply(
-      null,
+      undefined,
       epics.map(function(epic) {
-        return epic.apply(null, args);
+        return epic.apply(undefined, args);
       })
     );
   };
