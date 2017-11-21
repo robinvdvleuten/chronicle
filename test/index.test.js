@@ -1,13 +1,17 @@
-import reduxThunk from 'redux-thunk';
-import reduxSaga from 'redux-saga';
-import chronicle from '../src';
-import todos, { addTodo, addTodoAsync } from './helpers/todos';
+import { Subject } from 'rxjs/Subject';
+import todos, { addTodo } from './helpers/todos';
+import { createStore, combineEpics } from '../src';
+
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/ignoreElements';
+import 'rxjs/add/operator/map';
 
 const unknownAction = () => ({ type: 'UNKNOWN' });
 
 describe('chronicle', () => {
-  it('applies the reducer to the previous state', () => {
-    const store = chronicle(todos);
+  it('should apply the reducer to the previous state', () => {
+    const store = createStore(todos);
     expect(store.getState()).toEqual([]);
 
     store.dispatch(unknownAction());
@@ -34,8 +38,8 @@ describe('chronicle', () => {
     ]);
   });
 
-  it('applies the reducer to the initial state', () => {
-    const store = chronicle(todos, [
+  it('should apply the reducer to the initial state', () => {
+    const store = createStore(todos, [
       {
         id: 1,
         text: 'Hello',
@@ -69,78 +73,51 @@ describe('chronicle', () => {
     ]);
   });
 
-  it('supports multiple subscriptions', () => {
-    const store = chronicle(todos);
-    const listenerA = jest.fn(next => action => next(action));
-    const listenerB = jest.fn(next => action => next(action));
+  it('should subscribe epics to the action$', done => {
+    expect.assertions(1);
 
-    let unsubscribeA = store(() => listenerA);
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(1);
-    expect(listenerB.mock.calls.length).toBe(0);
+    const epic = action$ =>
+      action$
+        .do(action => {
+          expect(action).toEqual({ type: 'EPIC' });
+          done();
+        })
+        .ignoreElements();
 
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(2);
-    expect(listenerB.mock.calls.length).toBe(0);
+    const store = createStore(todos, {}, epic);
 
-    const unsubscribeB = store(() => listenerB);
-    expect(listenerA.mock.calls.length).toBe(2);
-    expect(listenerB.mock.calls.length).toBe(0);
-
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(1);
-
-    unsubscribeA();
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(1);
-
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(2);
-
-    unsubscribeB();
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(2);
-
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(2);
-
-    unsubscribeA = store(() => listenerA);
-    expect(listenerA.mock.calls.length).toBe(3);
-    expect(listenerB.mock.calls.length).toBe(2);
-
-    store.dispatch(unknownAction());
-    expect(listenerA.mock.calls.length).toBe(4);
-    expect(listenerB.mock.calls.length).toBe(2);
+    store.dispatch({ type: 'EPIC' });
   });
 
-  it('supports redux-thunk middleware', () => {
-    const store = chronicle(todos);
-    store(reduxThunk);
+  it('should combine multiple epics', () => {
+    expect.assertions(1);
 
-    store.dispatch(addTodoAsync('Hello'));
-    expect(store.getState()).toEqual([
-      {
-        id: 1,
-        text: 'Hello',
-      },
-    ]);
-  });
+    const epicFoo = (action$, store) =>
+      action$
+        .filter(action => action.type === 'ACTION_FOO')
+        .map(action => ({ type: 'RESOLVED_FOO', action, store }));
 
-  it('supports redux-saga middleware', () => {
-    const saga = reduxSaga();
+    const epicBar = (action$, store) =>
+      action$
+        .filter(action => action.type === 'ACTION_BAR')
+        .map(action => ({ type: 'RESOLVED_BAR', action, store }));
 
-    const store = chronicle(todos);
-    store(saga);
+    const epic = combineEpics(epicFoo, epicBar);
 
-    store.dispatch(addTodo('Hello'));
-    expect(store.getState()).toEqual([
-      {
-        id: 1,
-        text: 'Hello',
-      },
+    const action$ = new Subject();
+    const store = { I: 'am', a: 'store' };
+
+    const actions = [];
+
+    const result = epic(action$, store);
+    result.subscribe(action => actions.push(action));
+
+    action$.next({ type: 'ACTION_FOO' });
+    action$.next({ type: 'ACTION_BAR' });
+
+    expect(actions).toEqual([
+      { type: 'RESOLVED_FOO', action: { type: 'ACTION_FOO' }, store },
+      { type: 'RESOLVED_BAR', action: { type: 'ACTION_BAR' }, store },
     ]);
   });
 });
