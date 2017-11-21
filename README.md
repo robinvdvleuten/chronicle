@@ -8,7 +8,7 @@ Tiny observable & high-performance state management with RxJS as first-class cit
 ## Installation
 
 ```
-$ npm i chronicle --save
+$ npm i chronicle@alpha --save
 ```
 
 ## Usage
