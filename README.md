@@ -1,7 +1,8 @@
 # chronicle
 
-Tiny observable & high-performance state management.
+Tiny observable & high-performance state management with RxJS as first-class citizen.
 
+[![NPM version](https://img.shields.io/npm/v/chronicle.svg)](https://www.npmjs.com/package/chronicle)
 [![Build Status](https://travis-ci.org/robinvdvleuten/chronicle.svg?branch=master)](https://travis-ci.org/robinvdvleuten/chronicle)
 
 ## Installation
@@ -13,52 +14,35 @@ $ npm i chronicle --save
 ## Usage
 
 ```js
-import chronicle, { thunk } from 'chronicle';
+import { createStore } from 'chronicle';
 
-const ACTIONS = {
-  INCREMENT: state => ({ counter: state.counter + 1 }),
-  DECREMENT: state => ({ counter: state.counter - 1 }),
-};
+const counter = (state = 0, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1
+    case 'DECREMENT':
+      return state - 1
+    default:
+      return state
+  }
+}
 
-const store = chronicle(
-  (state = { counter: 0 }, action) =>
-    action && ACTIONS[action.type]
-      ? ACTIONS[action.type](state, action)
-      : state
-);
+const epic = (action$, store) =>
+  action$
+    .filter(action => action.type === 'DECREMENT')
+    .map(() => ({ type: 'INCREMENT' }));
 
-store(thunk());
+const store = createStore(counter, null, counterEpic);
 
-const unsubscribe = store(({ dispatch }) => next => action => {
-  console.log(action);
-  return next(action);
-});
+store.dispatch({ type: 'DECREMENT' });
 
-store.dispatch(dispatch => dispatch({ type: 'INCREMENT' }));
-
-unsubscribe();
-
-store.dispatch({ type: 'INCREMENT' });
-store.dispatch({ type: 'INCREMENT' });
-
+// Will output 1 instead of -1
 console.log(store.getState());
-```
-
-## Performance
-
-You can run the performance test through `npm run test:perf`;
-
-```bash
-chronicle x 892,393 ops/sec ±4.99% (66 runs sampled)
-chronicle with thunk x 332,470 ops/sec ±3.61% (49 runs sampled)
-redux x 557,308 ops/sec ±1.63% (89 runs sampled)
-redux with thunk x 288,050 ops/sec ±1.25% (90 runs sampled)
-Fastest is chronicle
 ```
 
 ## Credits
 
-Thanks Forbes Lindesay for donating the `chronicle` npm name.
+Thanks to [Redux Observable](https://redux-observable.js.org/) for the initial inspiration and [Forbes Lindesay](https://github.com/ForbesLindesay) for donating the `chronicle` npm name.
 
 ## License
 
