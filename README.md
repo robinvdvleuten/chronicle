@@ -32,7 +32,7 @@ const epic = (action$, store) =>
     .filter(action => action.type === 'DECREMENT')
     .map(() => ({ type: 'INCREMENT' }));
 
-const store = createStore(counter, null, counterEpic);
+const store = createStore(counter, null, epic);
 
 store.dispatch({ type: 'DECREMENT' });
 
