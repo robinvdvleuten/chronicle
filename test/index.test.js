@@ -1,4 +1,3 @@
-import { Subject } from 'rxjs/Subject';
 import todos, { addTodo } from './helpers/todos';
 import { createStore, combineEpics } from '../src';
 
@@ -9,7 +8,7 @@ import 'rxjs/add/operator/map';
 
 const unknownAction = () => ({ type: 'UNKNOWN' });
 
-describe('chronicle', () => {
+describe('createStore', () => {
   it('should apply the reducer to the previous state', () => {
     const store = createStore(todos);
     expect(store.getState()).toEqual([]);
@@ -88,10 +87,10 @@ describe('chronicle', () => {
 
     store.dispatch({ type: 'EPIC' });
   });
+});
 
+describe('combineEpics', () => {
   it('should combine multiple epics', () => {
-    expect.assertions(1);
-
     const epicFoo = (action$, store) =>
       action$
         .filter(action => action.type === 'ACTION_FOO')
@@ -102,22 +101,49 @@ describe('chronicle', () => {
         .filter(action => action.type === 'ACTION_BAR')
         .map(action => ({ type: 'RESOLVED_BAR', action, store }));
 
-    const epic = combineEpics(epicFoo, epicBar);
-
-    const action$ = new Subject();
-    const store = { I: 'am', a: 'store' };
-
     const actions = [];
 
-    const result = epic(action$, store);
-    result.subscribe(action => actions.push(action));
+    const epic = (action$, store) => {
+      action$.subscribe(action => actions.push(action));
+      return combineEpics(epicFoo, epicBar)(action$, store);
+    };
 
-    action$.next({ type: 'ACTION_FOO' });
-    action$.next({ type: 'ACTION_BAR' });
+    const store = createStore(() => {}, undefined, epic);
+
+    store.dispatch({ type: 'ACTION_FOO' });
+    store.dispatch({ type: 'ACTION_BAR' });
 
     expect(actions).toEqual([
-      { type: 'RESOLVED_FOO', action: { type: 'ACTION_FOO' }, store },
-      { type: 'RESOLVED_BAR', action: { type: 'ACTION_BAR' }, store },
+      { type: 'ACTION_FOO' },
+      {
+        type: 'RESOLVED_FOO',
+        action: { type: 'ACTION_FOO' },
+        store: { getState: store.getState },
+      },
+      { type: 'ACTION_BAR' },
+      {
+        type: 'RESOLVED_BAR',
+        action: { type: 'ACTION_BAR' },
+        store: { getState: store.getState },
+      },
     ]);
+  });
+
+  it('should pass dependencies to epics', done => {
+    expect.assertions(1);
+
+    const expected = { We: 'are', the: 'dependencies' };
+
+    const epic = (action$, store, dependencies) =>
+      action$
+        .do(() => {
+          expect(dependencies).toEqual(expected);
+          done();
+        })
+        .ignoreElements();
+
+    const store = createStore(todos, {}, epic, { dependencies: expected });
+
+    store.dispatch({ type: 'EPIC' });
   });
 });
